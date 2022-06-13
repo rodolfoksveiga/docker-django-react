@@ -26,3 +26,24 @@ Docker containers hold a whole OS, therefore, packages installed in containers c
   - `docker-compose 1.29`
 
 > You can still use newer version of the packages, but be aware that sometimes you may reproduce different outputs.
+
+### Stage 0 - Foundation
+
+In the initial stage we'll build the foundation of our project. Since learning the basics of Django and React isn't in the scope of this tutorial, we'll clone the [tutorial's Git repository](https://github.com/rodolfoksveiga/docker-django-react) to setup locally both backend and frontend. After that we'll be able to start configuring our containers.
+
+- Create the local repository `~/mayflower`, clone the Git repository into it, and checkout the branch `stage0-base`.
+
+  ```bash
+  mkdir ~/mayflower
+  cd ~/mayflower
+  git clone https://github.com/rodolfoksveiga/docker-django-react.git .
+  git checkout stage0-base
+  ```
+
+  After cloning the repository, we have two subdirectories inside `~/mayflower`: `./api` (backend) and `./app` (frontend).
+
+  The backend is a simple `django` API that exposes the `/api/students` endpoint. In this endpoint we can fetch (GET) all the records from the `Student` model as a JSON. `Student` is a user-defined model with two fields: `id` and `name`.
+
+  The frontend is a React APP that contains only one page, defined in `~/mayflower/app/src/App.js`. When the page is rendered we try to fetch the data from our API and print a list with all the students fetched or handle inconsistencies.
+
+At this point, we still can't test our application, because we haven't installed all the packages necessary to run it on the host machine and we still haven't setup the Docker containers. So I ask you to trust me for now and I promise you that soon we'll have the application running in containers, so we can play around with it.
