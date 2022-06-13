@@ -21,3 +21,12 @@ services:
       - ./api:/api
     depends_on:
       - psql
+
+  react:
+    container_name: app
+    build:
+      context: ./app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app/src:/app/src

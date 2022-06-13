@@ -225,3 +225,59 @@ We can now rebuild our containers with `docker-compose up --build --detach`, ope
 
 ![Django Admin with data](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/django_admin_data.png)
 ![Student's Endpoint with data](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/students_endpoint_data.png)
+
+### Stage 3 - Frontend (React)
+
+We've been doing a great job so far! The backend and the database are served in isolated environments and communicate to each other. To achieve the ultimate goal of this tutorial, we just need to encapsulate the React APP in a Docker container. To do it so, we'll need to create a new `Dockerfile` for the frontend and a new Docker service in our `docker-compose` file.
+
+1. Create `~/mayflower/app/Dockerfile` with instructions to build the Docker image for the React APP.
+
+   ```docker
+   FROM node:17.3-alpine
+
+   WORKDIR /app
+   COPY package.json .
+   RUN npm install
+
+   COPY . .
+
+   CMD ["npm", "start"]
+   ```
+
+   As usual, we started our `Dockerfile` by loading a pre-built image. This time we used a lightweight NodeJS image that contains the tools we need to serve the React APP.
+
+   We then copied the file `package.json` from the host machine into the container and installed the packages listed in this file running the command `npm install`. We decided to use the packaging tool NPM, because it's already installed in the pre-built NodeJS image.
+
+   Lastly, we copied all the files from `~/mayflower/app` (host machine) into `/app` (container) and with `npm start` we started the server.
+
+2. Add a new service to `~/mayflower/docker-compose.yml` corresponding to the frontend container.
+
+   ```yml
+   ...
+   services:
+     ...
+     react:
+       container_name: app
+       build:
+         context: ./app
+       ports:
+         - 3000:3000
+       volumes:
+         - ./app/src:/app/src
+   ```
+
+   We started the instructions for the `react` service by defining the container's name (`app`).
+
+   We also pointed `build:context` to `~/mayflower/app`, so Docker will look for the `Dockerfile` in this directory at the build stage.
+
+   After that the port `3000` of the host system was exposed to the port `3000` of the container, which serves the React APP by default.
+
+   The last instruction of this service bound `~/mayflower/app/src` (host machine) to `/app/src` (container). This time we bound only the `src` directory, because the files we would edit during the application development are there. With this setup, any change to files in this directory of host machine will be instantaneously applied to the respective files in the container.
+
+Finally, we can spin up our containers with `docker-compose up --detach`, open our browser, and navigate to http://localhost:3000. There we'll see the list of students. If you don't see a list of students, you probably have stopped your containers earlier and lost your data. So just add new students to the `Student` table and check that the frontend renders it.
+
+> You can run `docker logs app` if you want to see the output of the frontend container.
+
+![React with data](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/react_data.png)
+
+**Congratulations, you've made it through and now every single service of your full stack web application is served by Docker containers!**
