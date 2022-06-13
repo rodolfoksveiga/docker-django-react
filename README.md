@@ -281,3 +281,11 @@ Finally, we can spin up our containers with `docker-compose up --detach`, open o
 ![React with data](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/react_data.png)
 
 **Congratulations, you've made it through and now every single service of your full stack web application is served by Docker containers!**
+
+## Conclusion
+
+After going through this tutorial you have Docker containers serving your PostgreSQL, Django, and React services. With simple commands you can start (`docker-compose up`) and stop (`docker-compose down`) your containers. Now you can share this reproducible project with your teammates and focus on what really matters: the features of your web application!
+
+It's important to note once more that this tutorial covered the setup of a development environment. If you want to put your application into a production environment, you'll probably want to persist your data, implement CI/CD (Continuous Integration / Continuous Deployment), use a web server like Nginx to make your application more scalable, and apply other [Docker best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices). But that's a topic for another tutorial...
+
+Now it's time to work on the features of your web application and tweak your containers to satisfy new demands of your services. But don't rush, Docker can be complex, so take your time to absorb what you've learned until here. Try to use Docker on your daily projects and little by little you'll feel more comfortable with it and you'll be ready for the next step.
