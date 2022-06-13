@@ -150,3 +150,78 @@ Now we can spin up our container with `docker-compose up --detach`, open our bro
 
 ![Django Admin](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/django_admin.png)
 ![Student's Endpoint](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/students_endpoint.png)
+
+### Stage 2 - Database (PostgreSQL)
+
+So far, so good. We already have a Docker container serving our API. But the backend is still using SQLite, which is natively supported by Django. Let's switch to PostgreSQL and serve the database from a separated Docker container.
+
+Different from the backend container setup, in which we had to give the `Dockerfile` many instructions to customize a pre-built Python image, for the PostgreSQL container we can setup the database simply by passing to the `docker-compose` file a pre-built PostgreSQL image with some environment variables. The PostgreSQL image provides us an OS with all the required features to serve the database.
+
+1. Add the database credentials to `~/mayflower/api/.env`.
+
+   ```env
+   ...
+
+   PSQL_NAME = 'postgres'
+   PSQL_USER = 'admin'
+   PSQL_PASSWORD = 'password'
+   PSQL_HOST = 'psql'
+   PSQL_PORT = '5432'
+   ```
+
+   In this file we declared three environment variables that refer to the name of the PostgreSQL database containing our data (`PSQL_NAME`) and to valid credentials for a PostgreSQL Admin user that can manage the database (`PSQL_USER` and `PSQL_PASSWORD`). The variables `PSQL_HOST` and `PSQL_PORT` indicate, respectively, the name of the service hosting the database and the port to be used. We chose the value `5432` because it's the default port of PostgreSQL.
+
+2. In the file `~/mayflower/docker-compose.yml`, create a new service for the database.
+
+   ```yml
+   ...
+   services:
+     psql:
+       container_name: db
+       image: "postgres:14.1-alpine"
+       environment:
+         - POSTGRES_DB=postgres
+         - POSTGRES_USER=admin
+         - POSTGRES_PASSWORD=password
+
+     django:
+       ...
+       depends_on:
+         - psql
+   ```
+
+   Initially we set the service and the container names as `psql` and `db`, respectively.
+
+   Since we didn't have to customize the Docker image, we passed the image name directly to `docker-compose` and avoided writing a `Dockerfile`. For the same reasons described in the backend setup, we picked a PostgreSQL image that uses the Alpine Linux OS.
+
+   Next, we defined three environment variables. These variables configure the PostgreSQL Admin's user name (`POSTGRES_USER`) and password (`POSTGRES_PASSWORD`) for the specified database (`POSTGRES_DB`). Note that these variables must correspond to the variables `PSQL_NAME`, `PSQL_USER`, and `PSQL_PASSWORD`, declared in `~/mayflower/api/.env`.
+
+   At the end of the file we added a dependency on the `psql` service. The dependency assures that the `django` service will only start after the database is setup.
+
+   > Docker volumes are used to sync the data in the host machine with the data in the container. A nice feature of volumes is data persistence in case of undesired container failure. Since volumes persist the data across builds, they're the preferred mechanism for holding databases. For that reason, you may want to store your data in volumes in a production environment. Since we haven't used a Docker volume in this tutorial, every time we restart our database container we'll loose all the data added to the database.
+
+3. Configure `~/mayflower/api/api/settings.py` so that Django has permissions to access and manage the database.
+
+   ```python
+   ...
+   from os import environ
+   ...
+   DATABASES = {
+       'default': {
+           'ENGINE': 'django.db.backends.postgresql',
+           'NAME': environ.get('PSQL_NAME'),
+           'USER': environ.get('PSQL_USER'),
+           'PASSWORD': environ.get('PSQL_PASSWORD'),
+           'HOST': environ.get('PSQL_HOST'),
+           'PORT': environ.get('PSQL_PORT'),
+       }
+   }
+   ...
+   ```
+
+   We used the `environ` mapping object from `os` to import the environment variables from `~/mayflower/api/.env` and we linked their values to the Django variable `DATABASES`.
+
+We can now rebuild our containers with `docker-compose up --build --detach`, open our browser, navigate to http://localhost:8000/admin, and use our Django super user credentials to login the Django Admin page. In Django Admin we can add new students to the `Student` table and check that they're displayed at http://localhost:8000/api/students.
+
+![Django Admin with data](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/django_admin_data.png)
+![Student's Endpoint with data](https://github.com/rodolfoksveiga/docker-django-react/blob/main/imgs/students_endpoint_data.png)

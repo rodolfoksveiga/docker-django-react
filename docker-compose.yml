@@ -1,6 +1,14 @@
 version: "3.8"
 
 services:
+  psql:
+    container_name: db
+    image: "postgres:14.1-alpine"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+
   django:
     container_name: api
     build:
@@ -11,3 +19,5 @@ services:
       - 8000:8000
     volumes:
       - ./api:/api
+    depends_on:
+      - psql
