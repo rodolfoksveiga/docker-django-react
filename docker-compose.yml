@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  django:
+    container_name: api
+    build:
+      context: ./api
+    env_file:
+      - ./api/.env
+    ports:
+      - 8000:8000
+    volumes:
+      - ./api:/api
