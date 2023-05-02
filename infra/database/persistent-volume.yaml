@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: database-persistent-volume
+  labels:
+    type: local
+spec:
+  storageClassName: standard
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 200Mi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /data

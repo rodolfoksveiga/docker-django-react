@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: backend
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - image: rodolfoksveiga/django-react_django:latest
+          name: django
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DJANGO_SUPERUSER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DJANGO_SUPERUSER_EMAIL
+            - name: DJANGO_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DJANGO_SUPERUSER_PASSWORD
+            - name: DJANGO_SUPERUSER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DJANGO_SUPERUSER_USERNAME
+            - name: PSQL_ENGINE
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PSQL_ENGINE
+            - name: PSQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PSQL_HOST
+            - name: PSQL_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PSQL_NAME
+            - name: PSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PSQL_PASSWORD
+            - name: PSQL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PSQL_PORT
+            - name: PSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: PSQL_USER
+          volumeMounts:
+            - name: backend-logs
+              mountPath: /var/log
+      volumes:
+        - name: backend-logs
+          hostPath:
+            path: /var/log

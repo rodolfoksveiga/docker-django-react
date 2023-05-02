@@ -2,31 +2,33 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
+const API_URL = process.env.REACT_APP_API_URL ?? "http://localhost:8000";
+
 const App = () => {
   const [students, setStudents] = useState(null);
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/students/")
+      .get(`${API_URL}/api/students/`)
       .then((response) => {
         setStudents(response.data);
       })
       .catch((error) => console.log(error));
   }, []);
 
-  const isDBConnected = Boolean(students);
-  const isDBEmpty = isDBConnected && students.length === 0;
+  const isDbConnected = Boolean(students);
+  const isDbEmpty = isDbConnected && students.length === 0;
 
   return (
     <div className="App">
       <header className="App-header">
-        {isDBConnected ? (
-          isDBEmpty ? (
+        {isDbConnected ? (
+          isDbEmpty ? (
             <div>
               <h2>You have no students in your database..!</h2>
               <h5>
                 You can add students using{" "}
-                <a href="http://localhost:8000/admin">Django Admin</a>.
+                <a href={`${API_URL}/admin`}>Django Admin</a>.
               </h5>
             </div>
           ) : (
